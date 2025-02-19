@@ -48,29 +48,34 @@ export default function Dashboard() {
             <Card key={universe.id}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <Database className="h-5 w-5" />
-                      {universe.name}
-                    </div>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
+                  <div className="flex items-center gap-2">
+                    <Database className="h-5 w-5" />
+                    {universe.name}
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreVertical className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => window.location.href = `/universe/${universe.id}`}>
-                        <Eye className="h-4 w-4 mr-2" />
-                        View
+                      <DropdownMenuItem asChild>
+                        <Link href={`/universe/${universe.id}`}>
+                          <Eye className="h-4 w-4 mr-2" />
+                          View
+                        </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => window.location.href = `/universe/${universe.id}/edit`}>
-                        <Pencil className="h-4 w-4 mr-2" />
-                        Edit
+                      <DropdownMenuItem asChild>
+                        <Link href={`/universe/${universe.id}/edit`}>
+                          <Pencil className="h-4 w-4 mr-2" />
+                          Edit
+                        </Link>
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => window.location.href = `/universe/${universe.id}/history`}>
-                        <History className="h-4 w-4 mr-2" />
-                        History
+                      <DropdownMenuItem asChild>
+                        <Link href={`/universe/${universe.id}/history`}>
+                          <History className="h-4 w-4 mr-2" />
+                          History
+                        </Link>
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -91,29 +96,6 @@ export default function Dashboard() {
                     <span className="font-medium">
                       {new Date(universe.createdAt).toLocaleDateString()}
                     </span>
-                  </div>
-                  <div className="absolute top-3 right-3">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm">
-                          <MoreVertical className="h-4 w-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent>
-                        <DropdownMenuItem onClick={() => window.location.href = `/universe/${universe.id}`}>
-                          <Eye className="h-4 w-4 mr-2" />
-                          View
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => window.location.href = `/universe/${universe.id}/edit`}>
-                          <Pencil className="h-4 w-4 mr-2" />
-                          Edit
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => window.location.href = `/universe/${universe.id}/history`}>
-                          <History className="h-4 w-4 mr-2" />
-                          History
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
                   </div>
                 </div>
               </CardContent>
