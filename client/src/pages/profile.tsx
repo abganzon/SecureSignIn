@@ -10,10 +10,16 @@ export default function Profile() {
 
   if (!user) return null;
 
+  const getAccountType = (user: User) => {
+    if (user.googleId) return "Google Account";
+    if (user.githubId) return "GitHub Account";
+    return "Email Account";
+  };
+
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       <h1 className="text-3xl font-bold">Profile Settings</h1>
-      
+
       <Card>
         <CardHeader>
           <CardTitle>Account Information</CardTitle>
@@ -34,7 +40,7 @@ export default function Profile() {
             <div className="grid gap-1">
               <label className="text-sm font-medium">Account Type</label>
               <p className="text-sm text-muted-foreground">
-                {user.googleId ? "Google Account" : "GitHub Account"}
+                {getAccountType(user)}
               </p>
             </div>
 
