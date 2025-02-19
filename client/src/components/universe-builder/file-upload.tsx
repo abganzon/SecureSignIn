@@ -28,6 +28,7 @@ interface FileUploadProps {
 export function FileUpload({ onComplete }: FileUploadProps) {
   const [progress, setProgress] = useState(0);
   const [parsing, setParsing] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema)

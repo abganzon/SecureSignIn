@@ -11,12 +11,12 @@ interface MappingTableProps {
   headers: string[];
   columnValues: Record<string, string[]>;
   sampleData: Record<string, string[]>;
-  recordCount: number;
+  recordCount?: number;
   onComplete: (mappings: Record<string, string>) => void;
   onBack: () => void;
 }
 
-export function MappingTable({ headers, columnValues, recordCount, sampleData, onComplete, onBack }: MappingTableProps) {
+export function MappingTable({ headers, columnValues, recordCount = 0, sampleData, onComplete, onBack }: MappingTableProps) {
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
 
