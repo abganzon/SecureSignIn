@@ -67,9 +67,9 @@ export function Review({ name, type, recordCount, mappings }: ReviewProps) {
 
         <div>
           <label className="text-sm font-medium text-muted-foreground">
-            Total Records
+            Total Records from CSV
           </label>
-          <p className="text-lg font-medium">{recordCount}</p>
+          <p className="text-lg font-medium">{recordCount.toLocaleString()} records</p>
         </div>
 
         <div>

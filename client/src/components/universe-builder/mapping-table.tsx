@@ -16,14 +16,16 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
 
-  // Get all database fields from schema
-  const databaseFields = Object.values(AVAILABLE_MAPPINGS).flatMap(category =>
-    category.fields.map(field => ({
-      value: field.value,
-      label: field.label,
-      category: category.title
-    }))
-  );
+  // Get database fields excluding Identity Information
+  const databaseFields = Object.entries(AVAILABLE_MAPPINGS)
+    .filter(([key]) => key !== 'identity')
+    .flatMap(([_, category]) =>
+      category.fields.map(field => ({
+        value: field.value,
+        label: field.label,
+        category: category.title
+      }))
+    );
 
   useEffect(() => {
     // Auto-map on initial load
