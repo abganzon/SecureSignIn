@@ -1,4 +1,17 @@
-import { type User, type InsertUser, type Universe, type InsertUniverse } from "@shared/schema";
+import { type User, type InsertUser, type Universe, type InsertUniverse, users, universes } from "@shared/schema";
+import { eq } from "drizzle-orm";
+import { db } from "./db";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
+import { pool } from "./db";
+
+const PostgresSessionStore = connectPg(session);
+
+interface ResetToken {
+  userId: number;
+  token: string;
+  expires: Date;
+}
 
 export interface IStorage {
   // User operations
@@ -17,68 +30,58 @@ export interface IStorage {
   getUniverses(userId: number): Promise<Universe[]>;
   getUniverse(id: number): Promise<Universe | undefined>;
   createUniverse(universe: InsertUniverse): Promise<Universe>;
+
+  // Session store
+  sessionStore: session.Store;
 }
 
-interface ResetToken {
-  userId: number;
-  token: string;
-  expires: Date;
-}
-
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private universes: Map<number, Universe>;
+export class DatabaseStorage implements IStorage {
   private resetTokens: Map<string, ResetToken>;
-  private currentUserId: number;
-  private currentUniverseId: number;
+  sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.universes = new Map();
     this.resetTokens = new Map();
-    this.currentUserId = 1;
-    this.currentUniverseId = 1;
+    this.sessionStore = new PostgresSessionStore({
+      pool,
+      createTableIfMissing: true,
+    });
   }
 
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
   }
 
   async getUserByOAuth(provider: "google" | "github", id: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => (provider === "google" && user.googleId === id) || 
-                (provider === "github" && user.githubId === id)
-    );
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(
+        provider === "google" 
+          ? eq(users.googleId, id)
+          : eq(users.githubId, id)
+      );
+    return user;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { 
-      ...insertUser, 
-      id, 
-      createdAt: new Date(),
-      googleId: null,
-      githubId: null,
-      avatarUrl: null
-    };
-    this.users.set(id, user);
+    const [user] = await db.insert(users).values(insertUser).returning();
     return user;
   }
 
   async updateUserPassword(id: number, password: string): Promise<void> {
-    const user = await this.getUser(id);
-    if (user) {
-      user.password = password;
-      this.users.set(id, user);
-    }
+    await db.update(users)
+      .set({ password })
+      .where(eq(users.id, id));
   }
 
+  // For now, we'll keep reset tokens in memory
+  // In a production environment, these should be stored in the database
   async saveResetToken(userId: number, token: string, expires: Date): Promise<void> {
     this.resetTokens.set(token, { userId, token, expires });
   }
@@ -100,21 +103,18 @@ export class MemStorage implements IStorage {
   }
 
   async getUniverses(userId: number): Promise<Universe[]> {
-    return Array.from(this.universes.values()).filter(
-      (universe) => universe.userId === userId
-    );
+    return db.select().from(universes).where(eq(universes.userId, userId));
   }
 
   async getUniverse(id: number): Promise<Universe | undefined> {
-    return this.universes.get(id);
+    const [universe] = await db.select().from(universes).where(eq(universes.id, id));
+    return universe;
   }
 
   async createUniverse(insertUniverse: InsertUniverse): Promise<Universe> {
-    const id = this.currentUniverseId++;
-    const universe: Universe = { ...insertUniverse, id, createdAt: new Date() };
-    this.universes.set(id, universe);
+    const [universe] = await db.insert(universes).values(insertUniverse).returning();
     return universe;
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
