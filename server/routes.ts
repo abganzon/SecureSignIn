@@ -26,13 +26,21 @@ async function comparePasswords(stored: string, supplied: string) {
   return timingSafeEqual(hashedBuf, suppliedBuf);
 }
 
+// Generate a random token for password reset
+function generateResetToken() {
+  return randomBytes(32).toString("hex");
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Session setup
+  // Session setup with remember me functionality
   app.use(session({
     secret: process.env.SESSION_SECRET || 'keyboard cat',
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
+    cookie: { 
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 24 * 60 * 60 * 1000 // 24 hours by default
+    }
   }));
 
   app.use(passport.initialize());
@@ -40,8 +48,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Local Strategy
   passport.use(new LocalStrategy({ 
-    usernameField: 'email' 
-  }, async (email, password, done) => {
+    usernameField: 'email',
+    passReqToCallback: true
+  }, async (req, email, password, done) => {
     try {
       const user = await storage.getUserByEmail(email);
       if (!user || !user.password) {
@@ -51,6 +60,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!isValid) {
         return done(null, false, { message: 'Invalid credentials' });
       }
+
+      // If remember me is checked, extend session
+      if (req.body.rememberMe) {
+        req.session.cookie.maxAge = 30 * 24 * 60 * 60 * 1000; // 30 days
+      }
+
       return done(null, user);
     } catch (err) {
       return done(err);
@@ -68,6 +83,55 @@ export async function registerRoutes(app: Express): Promise<Server> {
       done(null, user);
     } catch (err) {
       done(err);
+    }
+  });
+
+  // Password reset routes
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    try {
+      const { email } = req.body;
+      const user = await storage.getUserByEmail(email);
+
+      if (!user) {
+        // Don't reveal if user exists
+        return res.json({ message: 'If an account exists, you will receive a password reset email.' });
+      }
+
+      // Generate and save reset token
+      const resetToken = generateResetToken();
+      const resetExpires = new Date(Date.now() + 3600000); // 1 hour
+
+      await storage.saveResetToken(user.id, resetToken, resetExpires);
+
+      // In a real application, send email here
+      // For now, just return the token in the response
+      res.json({ 
+        message: 'Password reset instructions sent.',
+        token: resetToken // Remove this in production
+      });
+    } catch (err) {
+      res.status(500).json({ message: 'Error processing request' });
+    }
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    try {
+      const { token, password } = req.body;
+
+      // Verify token and get user
+      const user = await storage.getUserByResetToken(token);
+      if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+      }
+
+      // Hash new password and update user
+      const hashedPassword = await hashPassword(password);
+      await storage.updateUserPassword(user.id, hashedPassword);
+      await storage.clearResetToken(user.id);
+
+      res.json({ message: 'Password successfully reset' });
+    } catch (err) {
+      res.status(500).json({ message: 'Error resetting password' });
     }
   });
 
