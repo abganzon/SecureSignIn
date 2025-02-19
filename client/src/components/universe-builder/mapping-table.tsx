@@ -16,8 +16,8 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
 
-  // Get all available target fields
-  const allTargetFields = Object.values(AVAILABLE_MAPPINGS).flatMap(category => 
+  // Get all database fields from schema
+  const databaseFields = Object.values(AVAILABLE_MAPPINGS).flatMap(category =>
     category.fields.map(field => ({
       value: field.value,
       label: field.label,
@@ -30,19 +30,19 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
     const autoMappings: Record<string, string> = {};
     const scores: Record<string, number> = {};
 
-    headers.forEach(header => {
-      let bestMatch = { field: "", score: 0 };
+    databaseFields.forEach(field => {
+      let bestMatch = { header: "", score: 0 };
 
-      allTargetFields.forEach(field => {
+      headers.forEach(header => {
         const score = calculateMappingScore(header, field.label);
         if (score > bestMatch.score && score > 0.6) {
-          bestMatch = { field: field.value, score };
+          bestMatch = { header, score };
         }
       });
 
-      if (bestMatch.field) {
-        autoMappings[header] = bestMatch.field;
-        scores[header] = bestMatch.score;
+      if (bestMatch.header) {
+        autoMappings[field.value] = bestMatch.header;
+        scores[field.value] = bestMatch.score;
       }
     });
 
@@ -71,41 +71,27 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
     );
   };
 
-  const getFieldDetails = (value: string) => {
-    for (const category of Object.values(AVAILABLE_MAPPINGS)) {
-      const field = category.fields.find(f => f.value === value);
-      if (field) {
-        return {
-          label: field.label,
-          category: category.title
-        };
-      }
-    }
-    return null;
-  };
+  // Group database fields by category
+  const groupedFields = Object.entries(AVAILABLE_MAPPINGS).map(([key, category]) => ({
+    category: category.title,
+    fields: category.fields
+  }));
 
-  // Group unmapped target fields by category
-  const getUnmappedFields = () => {
-    const mappedValues = Object.values(mappings);
-    return Object.entries(AVAILABLE_MAPPINGS).map(([key, category]) => ({
-      category: category.title,
-      fields: category.fields.filter(field => !mappedValues.includes(field.value))
-    })).filter(group => group.fields.length > 0);
+  const getUnmappedHeaders = () => {
+    const mappedHeaders = Object.values(mappings);
+    return headers.filter(header => !mappedHeaders.includes(header));
   };
 
   return (
     <div className="p-6 space-y-8">
-      {/* Field Mapping Table */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-medium">Field Mapping</h3>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => {
-              const newMappings = {};
-              const newScores = {};
-              setMappings(newMappings);
-              setMatchScores(newScores);
+              setMappings({});
+              setMatchScores({});
             }}
           >
             Reset Mappings
@@ -115,83 +101,71 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>CSV Column</TableHead>
+              <TableHead>Database Field</TableHead>
               <TableHead></TableHead>
-              <TableHead>Target Field</TableHead>
+              <TableHead>CSV Column</TableHead>
               <TableHead>Match Score</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {headers.map((header) => (
-              <TableRow key={header}>
-                <TableCell className="font-medium">{header}</TableCell>
-                <TableCell>
-                  <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
-                </TableCell>
-                <TableCell>
-                  <Select
-                    value={mappings[header] || ""}
-                    onValueChange={(value) => {
-                      const fieldDetails = getFieldDetails(value);
-                      if (fieldDetails) {
-                        const score = calculateMappingScore(header, fieldDetails.label);
-                        setMatchScores(prev => ({ ...prev, [header]: score }));
-                      }
-                      setMappings(prev => ({ ...prev, [header]: value }));
-                    }}
-                  >
-                    <SelectTrigger>
-                      <SelectValue>
-                        {mappings[header] ? 
-                          getFieldDetails(mappings[header])?.label : 
-                          "Select field"}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Object.entries(AVAILABLE_MAPPINGS).map(([key, category]) => (
-                        <div key={key}>
-                          <div className="px-2 py-1.5 text-sm font-semibold text-muted-foreground">
-                            {category.title}
-                          </div>
-                          {category.fields.map((field) => (
-                            <SelectItem key={field.value} value={field.value}>
-                              {field.label}
+            {groupedFields.map(group => (
+              <>
+                <TableRow key={group.category}>
+                  <TableCell colSpan={4} className="bg-muted/50">
+                    <h4 className="font-medium text-sm">{group.category}</h4>
+                  </TableCell>
+                </TableRow>
+                {group.fields.map(field => (
+                  <TableRow key={field.value}>
+                    <TableCell className="font-medium">{field.label}</TableCell>
+                    <TableCell>
+                      <ArrowRightLeft className="h-4 w-4 text-muted-foreground" />
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={mappings[field.value] || ""}
+                        onValueChange={(header) => {
+                          const score = calculateMappingScore(header, field.label);
+                          setMatchScores(prev => ({ ...prev, [field.value]: score }));
+                          setMappings(prev => ({ ...prev, [field.value]: header }));
+                        }}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select CSV column" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {headers.map(header => (
+                            <SelectItem key={header} value={header}>
+                              {header}
                             </SelectItem>
                           ))}
-                        </div>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </TableCell>
-                <TableCell>
-                  {getMatchScoreBadge(matchScores[header])}
-                </TableCell>
-              </TableRow>
+                        </SelectContent>
+                      </Select>
+                    </TableCell>
+                    <TableCell>
+                      {getMatchScoreBadge(matchScores[field.value])}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </>
             ))}
           </TableBody>
         </Table>
       </div>
 
-      {/* Unmapped Fields */}
+      {/* Unmapped CSV Columns */}
       <div className="space-y-4">
-        <h3 className="text-lg font-medium">Unmapped Fields</h3>
+        <h3 className="text-lg font-medium">Unmapped CSV Columns</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {getUnmappedFields().map(({ category, fields }) => (
-            <div key={category} className="p-4 border rounded-lg">
-              <h4 className="font-medium mb-2 text-muted-foreground">{category}</h4>
-              <ul className="space-y-2">
-                {fields.map(field => (
-                  <li key={field.value} className="text-sm">
-                    {field.label}
-                  </li>
-                ))}
-              </ul>
+          {getUnmappedHeaders().map(header => (
+            <div key={header} className="p-4 border rounded-lg">
+              <span className="text-sm">{header}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <Button 
+      <Button
         className="w-full"
         onClick={() => onComplete(mappings)}
       >
