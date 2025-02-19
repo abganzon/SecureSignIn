@@ -189,12 +189,11 @@ export function MappingTable({ headers, columnValues, recordCount, sampleData, o
         </div>
       </div>
 
-      {recordCount > 0 && (
-        <div className="bg-muted p-4 rounded-lg">
-          <div className="text-sm font-medium">Total Records</div>
-          <div className="text-2xl font-bold">{recordCount.toLocaleString()}</div>
-        </div>
-      )}
+      <div className="bg-muted p-4 rounded-lg">
+        <div className="text-sm font-medium">Total Records from CSV</div>
+        <div className="text-2xl font-bold">{recordCount?.toLocaleString() || 0}</div>
+        <div className="text-sm text-muted-foreground mt-1">Records to be processed</div>
+      </div>
 
       <div className="flex gap-4">
         <Button

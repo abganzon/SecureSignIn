@@ -39,6 +39,8 @@ export default function UniverseBuilder() {
     file: File;
     headers: string[];
     recordCount: number;
+    columnValues: Record<string, string[]>;
+    sampleData: Record<string, string[]>;
   }) => {
     setData({
       ...data,

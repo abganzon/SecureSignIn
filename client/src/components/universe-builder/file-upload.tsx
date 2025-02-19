@@ -133,11 +133,11 @@ export function FileUpload({ onComplete }: FileUploadProps) {
           )}
         />
 
-        {parsing && (
+        {(uploading || parsing) && (
           <div className="space-y-2">
             <Progress value={progress} />
             <p className="text-sm text-muted-foreground">
-              Parsing file... {Math.round(progress)}%
+              {uploading ? 'Uploading' : 'Parsing'} file... {Math.round(progress)}%
             </p>
           </div>
         )}
