@@ -9,6 +9,7 @@ import { ArrowRight, ArrowRightLeft } from "lucide-react";
 
 interface MappingTableProps {
   headers: string[];
+  columnValues: Record<string, string[]>;
   onComplete: (mappings: Record<string, string>) => void;
 }
 
@@ -138,7 +139,15 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
                         <SelectContent>
                           {headers.map(header => (
                             <SelectItem key={header} value={header}>
-                              {header}
+                              <div className="flex flex-col">
+                                <span>{header}</span>
+                                {columnValues[header]?.length > 0 && (
+                                  <span className="text-xs text-muted-foreground">
+                                    Example: {columnValues[header].slice(0, 3).join(", ")}
+                                    {columnValues[header].length > 3 ? "..." : ""}
+                                  </span>
+                                )}
+                              </div>
                             </SelectItem>
                           ))}
                         </SelectContent>

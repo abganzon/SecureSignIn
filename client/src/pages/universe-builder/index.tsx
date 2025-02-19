@@ -16,6 +16,7 @@ export default function UniverseBuilder() {
     headers: string[];
     mappings: Record<string, string>;
     recordCount: number;
+    columnValues: Record<string, string[]>;
   }>({
     name: "",
     type: "",

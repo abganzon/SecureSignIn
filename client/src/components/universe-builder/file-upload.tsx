@@ -45,12 +45,31 @@ export function FileUpload({ onComplete }: FileUploadProps) {
       },
       complete: (results) => {
         setParsing(false);
+        
+        // Get unique values for each column
+        const columnValues: Record<string, Set<string>> = {};
+        const headers = results.meta.fields || [];
+        
+        results.data.forEach((row: any) => {
+          headers.forEach(header => {
+            if (!columnValues[header]) {
+              columnValues[header] = new Set();
+            }
+            if (row[header]) {
+              columnValues[header].add(row[header].toString());
+            }
+          });
+        });
+
         onComplete({
           name: data.name,
           type: data.type,
           file: data.file,
-          headers: results.meta.fields || [],
-          recordCount: results.data.length
+          headers,
+          recordCount: results.data.length,
+          columnValues: Object.fromEntries(
+            Object.entries(columnValues).map(([k, v]) => [k, Array.from(v)])
+          )
         });
       }
     });
