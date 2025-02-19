@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+import { Plus, Globe, Database, Eye, Pencil, History } from "lucide-react";
+
 import { Plus, Globe, Database } from "lucide-react";
 import { Link } from "wouter";
 import type { Universe } from "@shared/schema";
@@ -60,6 +63,20 @@ export default function Dashboard() {
                     <span className="font-medium">
                       {new Date(universe.createdAt).toLocaleDateString()}
                     </span>
+                  </div>
+                  <div className="flex justify-between gap-2 mt-4">
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => window.location.href = `/universe/${universe.id}`}>
+                      <Eye className="h-4 w-4 mr-2" />
+                      View
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => window.location.href = `/universe/${universe.id}/edit`}>
+                      <Pencil className="h-4 w-4 mr-2" />
+                      Edit
+                    </Button>
+                    <Button variant="outline" size="sm" className="flex-1" onClick={() => window.location.href = `/universe/${universe.id}/history`}>
+                      <History className="h-4 w-4 mr-2" />
+                      History
+                    </Button>
                   </div>
                 </div>
               </CardContent>

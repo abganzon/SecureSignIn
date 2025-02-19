@@ -39,6 +39,16 @@ export class DatabaseStorage implements IStorage {
   private resetTokens: Map<string, ResetToken>;
   sessionStore: session.Store;
 
+
+  async getUniverseHistory(universeId: number): Promise<UniverseHistory[]> {
+    return await db.select().from(universeHistory).where(eq(universeHistory.universeId, universeId));
+  }
+
+  async addUniverseHistory(data: { universeId: number, action: string, description: string, changes?: any }): Promise<UniverseHistory> {
+    const [history] = await db.insert(universeHistory).values(data).returning();
+    return history;
+  }
+
   constructor() {
     this.resetTokens = new Map();
     this.sessionStore = new PostgresSessionStore({

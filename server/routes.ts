@@ -192,6 +192,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.json(user);
       });
     })(req, res, next);
+
+  app.get('/api/universes/:id', async (req, res) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+    const universe = await storage.getUniverse(parseInt(req.params.id));
+    if (!universe) {
+      res.status(404).json({ message: 'Universe not found' });
+      return;
+    }
+    res.json(universe);
+  });
+
+  app.get('/api/universes/:id/history', async (req, res) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+    const history = await storage.getUniverseHistory(parseInt(req.params.id));
+    res.json(history);
+  });
+
   });
 
   // OAuth routes

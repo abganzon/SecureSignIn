@@ -40,6 +40,18 @@ export const insertUniverseSchema = createInsertSchema(universes).pick({
   mappings: true,
 });
 
+
+export const universeHistory = pgTable("universe_history", {
+  id: serial("id").primaryKey(),
+  universeId: integer("universe_id").notNull(),
+  action: text("action").notNull(),
+  description: text("description").notNull(),
+  changes: jsonb("changes"),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type UniverseHistory = typeof universeHistory.$inferSelect;
+
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type InsertUniverse = z.infer<typeof insertUniverseSchema>;
