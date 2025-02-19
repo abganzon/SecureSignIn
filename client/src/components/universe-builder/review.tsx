@@ -50,21 +50,12 @@ export function Review({ name, type, recordCount, mappings }: ReviewProps) {
   return (
     <div className="p-6 space-y-6">
       <div className="space-y-4">
-        <div className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">
-                Universe Name
-              </label>
-              <p className="text-lg font-medium">{name}</p>
-            </div>
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">
-                Total Records in CSV
-              </label>
-              <p className="text-2xl font-bold text-primary">{recordCount.toLocaleString()}</p>
-              <span className="text-sm text-muted-foreground">records will be processed</span>
-            </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="text-sm font-medium text-muted-foreground">
+              Universe Name
+            </label>
+            <p className="text-lg font-medium">{name}</p>
           </div>
           <div>
             <label className="text-sm font-medium text-muted-foreground">
