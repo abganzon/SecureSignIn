@@ -63,7 +63,7 @@ export function Sidebar() {
       </ScrollArea>
 
       <div className="p-4 mt-auto border-t">
-        <Link href="/api/auth/logout">
+        <Link href="/login" onClick={() => fetch('/api/auth/logout')}>
           <Button variant="ghost" className="w-full justify-start gap-2">
             <LogOut className="h-4 w-4" />
             Logout
