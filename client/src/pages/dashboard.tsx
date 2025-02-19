@@ -3,8 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 import { Plus, Globe, Database, Eye, Pencil, History } from "lucide-react";
-
-import { Plus, Globe, Database } from "lucide-react";
 import { Link } from "wouter";
 import type { Universe } from "@shared/schema";
 
