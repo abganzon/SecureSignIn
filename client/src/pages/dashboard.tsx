@@ -48,16 +48,17 @@ export default function Dashboard() {
             <Card key={universe.id}>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Database className="h-5 w-5" />
-                    {universe.name}
-                  </div>
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreVertical className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
+                  <div className="flex items-center justify-between w-full">
+                    <div className="flex items-center gap-2">
+                      <Database className="h-5 w-5" />
+                      {universe.name}
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreVertical className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                       <DropdownMenuItem onClick={() => window.location.href = `/universe/${universe.id}`}>
                         <Eye className="h-4 w-4 mr-2" />
