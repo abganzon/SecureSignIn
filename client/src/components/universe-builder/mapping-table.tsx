@@ -20,7 +20,7 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
     const autoMappings: Record<string, string> = {};
     headers.forEach(header => {
       let bestMatch = { field: "", score: 0 };
-      
+
       Object.values(AVAILABLE_MAPPINGS).forEach(category => {
         category.fields.forEach(field => {
           const score = calculateMappingScore(header, field.label);
@@ -44,7 +44,7 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
       const field = category.fields.find(f => f.value === mapping);
       if (field) fieldLabel = field.label;
     });
-    
+
     const score = calculateMappingScore(header, fieldLabel);
     if (score > 0.8) return "High";
     if (score > 0.6) return "Medium";
@@ -57,7 +57,7 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
       Medium: { color: "text-yellow-700", bg: "bg-yellow-100" },
       Low: { color: "text-red-700", bg: "bg-red-100" }
     };
-    
+
     return (
       <Badge variant="outline" className={`${variants[score].color} ${variants[score].bg}`}>
         {score}
@@ -65,8 +65,33 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
     );
   };
 
+  const getFieldLabel = (value: string): string => {
+    let label = value;
+    Object.values(AVAILABLE_MAPPINGS).forEach(category => {
+      const field = category.fields.find(f => f.value === value);
+      if (field) label = field.label;
+    });
+    return label;
+  };
+
   return (
     <div className="p-6 space-y-6">
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Available Fields</h3>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+          {Object.entries(AVAILABLE_MAPPINGS).map(([category, { title, fields }]) => (
+            <div key={category} className="p-3 border rounded-lg">
+              <h4 className="font-medium mb-2">{title}</h4>
+              <ul className="space-y-1 text-sm text-muted-foreground">
+                {fields.map(field => (
+                  <li key={field.value}>{field.label}</li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </div>
+      </div>
+
       <Table>
         <TableHeader>
           <TableRow>
@@ -78,7 +103,7 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
         <TableBody>
           {headers.map((header) => (
             <TableRow key={header}>
-              <TableCell>{header}</TableCell>
+              <TableCell className="font-medium">{header}</TableCell>
               <TableCell>
                 <Select
                   value={mappings[header] || ""}
@@ -87,7 +112,9 @@ export function MappingTable({ headers, onComplete }: MappingTableProps) {
                   }
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select field" />
+                    <SelectValue>
+                      {mappings[header] ? getFieldLabel(mappings[header]) : "Select field"}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(AVAILABLE_MAPPINGS).map(([key, category]) => (
