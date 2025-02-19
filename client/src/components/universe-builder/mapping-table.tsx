@@ -13,7 +13,7 @@ interface MappingTableProps {
   onComplete: (mappings: Record<string, string>) => void;
 }
 
-export function MappingTable({ headers, onComplete }: MappingTableProps) {
+export function MappingTable({ headers, columnValues, onComplete }: MappingTableProps) {
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
 

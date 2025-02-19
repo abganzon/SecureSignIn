@@ -67,9 +67,12 @@ export function Review({ name, type, recordCount, mappings }: ReviewProps) {
 
         <div>
           <label className="text-sm font-medium text-muted-foreground">
-            Total Records from CSV
+            Total Records from CSV File
           </label>
-          <p className="text-lg font-medium">{recordCount.toLocaleString()} records</p>
+          <p className="text-2xl font-bold text-primary">{recordCount.toLocaleString()} records</p>
+          <span className="text-sm text-muted-foreground">
+            These records will be processed during universe creation
+          </span>
         </div>
 
         <div>

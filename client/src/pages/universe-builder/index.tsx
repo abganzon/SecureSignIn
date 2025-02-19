@@ -23,6 +23,11 @@ export default function UniverseBuilder() {
     file: null,
     headers: [],
     mappings: {},
+    recordCount: 0,
+    columnValues: {},
+    file: null,
+    headers: [],
+    mappings: {},
     recordCount: 0
   });
 
