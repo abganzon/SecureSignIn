@@ -188,10 +188,12 @@ export function MappingTable({ headers, columnValues, onComplete }: MappingTable
         </div>
       </div>
 
-      <div className="bg-muted p-4 rounded-lg">
-        <div className="text-sm font-medium">Total Records</div>
-        <div className="text-2xl font-bold">{recordCount.toLocaleString()}</div>
-      </div>
+      {recordCount > 0 && (
+        <div className="bg-muted p-4 rounded-lg">
+          <div className="text-sm font-medium">Total Records</div>
+          <div className="text-2xl font-bold">{recordCount.toLocaleString()}</div>
+        </div>
+      )}
 
       <Button
         className="w-full"

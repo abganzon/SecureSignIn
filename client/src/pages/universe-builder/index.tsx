@@ -17,6 +17,7 @@ export default function UniverseBuilder() {
     mappings: Record<string, string>;
     recordCount: number;
     columnValues: Record<string, string[]>;
+    sampleData: Record<string, any>; // Added sampleData type for clarity
   }>({
     name: "",
     type: "",
@@ -25,11 +26,7 @@ export default function UniverseBuilder() {
     mappings: {},
     recordCount: 0,
     columnValues: {},
-    sampleData: {},
-    file: null,
-    headers: [],
-    mappings: {},
-    recordCount: 0
+    sampleData: {} //Initialized sampleData
   });
 
   const handleUploadComplete = (result: {
