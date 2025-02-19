@@ -19,7 +19,13 @@ async function hashPassword(password: string) {
   return `${buf.toString("hex")}.${salt}`;
 }
 
-async function comparePasswords(stored: string, supplied: string) {
+async function comparePasswords(supplied: string, stored: string) {
+  // Make sure we have both parts of the stored password
+  if (!stored.includes('.')) {
+    console.log('Invalid stored password format');
+    return false;
+  }
+
   const [hashed, salt] = stored.split(".");
   const hashedBuf = Buffer.from(hashed, "hex");
   const suppliedBuf = (await scryptAsync(supplied, salt, 64)) as Buffer;
@@ -56,7 +62,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!user || !user.password) {
         return done(null, false, { message: 'Invalid credentials' });
       }
-      const isValid = await comparePasswords(user.password, password);
+      const isValid = await comparePasswords(password, user.password);
       if (!isValid) {
         return done(null, false, { message: 'Invalid credentials' });
       }
@@ -168,14 +174,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add some logging to help debug
   app.post('/api/auth/login', (req, res, next) => {
+    console.log('Login attempt:', { email: req.body.email });
     passport.authenticate('local', (err, user, info) => {
-      if (err) return next(err);
+      if (err) {
+        console.error('Login error:', err);
+        return next(err);
+      }
       if (!user) {
+        console.log('Login failed:', info?.message);
         return res.status(401).json({ message: info?.message || 'Authentication failed' });
       }
       req.login(user, (err) => {
         if (err) return next(err);
+        console.log('Login successful for user:', user.id);
         return res.json(user);
       });
     })(req, res, next);
