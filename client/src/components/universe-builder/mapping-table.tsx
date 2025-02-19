@@ -146,7 +146,7 @@ export function MappingTable({ headers, columnValues, recordCount, sampleData, o
                                 <span>{header}</span>
                                 {columnValues[header]?.length > 0 && (
                                   <span className="text-xs text-muted-foreground">
-                                    Example: {columnValues[header].slice(0, 3).join(", ")}
+                                    Sample: {columnValues[header].slice(0, 3).join(", ")}
                                     {columnValues[header].length > 3 ? "..." : ""}
                                   </span>
                                 )}
