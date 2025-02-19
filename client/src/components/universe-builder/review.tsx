@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -11,25 +11,42 @@ interface ReviewProps {
   type: string;
   recordCount: number;
   mappings: Record<string, string>;
+  file: File;
 }
 
-export function Review({ name, type, recordCount, mappings }: ReviewProps) {
+export function Review({ name, type, recordCount, mappings, file }: ReviewProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const queryClient = useQueryClient();
 
   const createUniverse = useMutation({
-    mutationFn: async (data: InsertUniverse) => {
-      const res = await apiRequest("POST", "/api/universes", data);
+    mutationFn: async (data: InsertUniverse & { file: File }) => {
+      const formData = new FormData();
+      formData.append('file', data.file);
+      formData.append('data', JSON.stringify({
+        name: data.name,
+        type: data.type,
+        recordCount: data.recordCount,
+        mappings: data.mappings
+      }));
+
+      const res = await apiRequest("POST", "/api/universes", formData, {
+        headers: {
+          // Don't set Content-Type, let the browser set it with the boundary
+          Accept: "application/json",
+        },
+      });
       return res.json();
     },
     onSuccess: () => {
       toast({
         title: "Universe Created",
-        description: "Your universe has been successfully created."
+        description: "Your universe has been successfully created with the mapped data."
       });
+      queryClient.invalidateQueries({ queryKey: ["/api/universes"] });
       setLocation("/dashboard");
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Error",
         description: error.message,
@@ -43,8 +60,9 @@ export function Review({ name, type, recordCount, mappings }: ReviewProps) {
       name,
       type,
       recordCount,
-      mappings
-    } as InsertUniverse);
+      mappings,
+      file
+    } as InsertUniverse & { file: File });
   };
 
   return (

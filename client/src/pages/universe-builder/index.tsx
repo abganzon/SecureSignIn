@@ -89,6 +89,7 @@ export default function UniverseBuilder() {
               type={data.type}
               recordCount={data.recordCount}
               mappings={data.mappings}
+              file={data.file!}
             />
           </TabsContent>
         </Tabs>
