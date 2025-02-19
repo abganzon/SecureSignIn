@@ -35,11 +35,13 @@ export function FileUpload({ onComplete }: FileUploadProps) {
 
   const onSubmit = async (data: z.infer<typeof formSchema>) => {
     setParsing(true);
+    let rows = 0;
     
     Papa.parse(data.file, {
       header: true,
       skipEmptyLines: true,
       step: (results, parser) => {
+        rows++;
         const progress = (results.meta.cursor / data.file.size) * 100;
         setProgress(Math.min(progress, 100));
       },
@@ -49,14 +51,19 @@ export function FileUpload({ onComplete }: FileUploadProps) {
         // Get unique values for each column
         const columnValues: Record<string, Set<string>> = {};
         const headers = results.meta.fields || [];
+        const sampleData: Record<string, string[]> = {};
         
         results.data.forEach((row: any) => {
           headers.forEach(header => {
             if (!columnValues[header]) {
               columnValues[header] = new Set();
+              sampleData[header] = [];
             }
             if (row[header]) {
               columnValues[header].add(row[header].toString());
+              if (sampleData[header].length < 5) {
+                sampleData[header].push(row[header].toString());
+              }
             }
           });
         });
@@ -69,7 +76,8 @@ export function FileUpload({ onComplete }: FileUploadProps) {
           recordCount: results.data.length,
           columnValues: Object.fromEntries(
             Object.entries(columnValues).map(([k, v]) => [k, Array.from(v)])
-          )
+          ),
+          sampleData
         });
       }
     });

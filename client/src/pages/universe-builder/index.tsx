@@ -25,6 +25,7 @@ export default function UniverseBuilder() {
     mappings: {},
     recordCount: 0,
     columnValues: {},
+    sampleData: {},
     file: null,
     headers: [],
     mappings: {},
@@ -85,6 +86,9 @@ export default function UniverseBuilder() {
           <TabsContent value="mapping">
             <MappingTable
               headers={data.headers}
+              columnValues={data.columnValues}
+              sampleData={data.sampleData}
+              recordCount={data.recordCount}
               onComplete={handleMappingComplete}
             />
           </TabsContent>

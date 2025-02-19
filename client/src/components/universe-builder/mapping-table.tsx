@@ -10,6 +10,8 @@ import { ArrowRight, ArrowRightLeft } from "lucide-react";
 interface MappingTableProps {
   headers: string[];
   columnValues: Record<string, string[]>;
+  sampleData: Record<string, string[]>;
+  recordCount: number;
   onComplete: (mappings: Record<string, string>) => void;
 }
 
@@ -169,11 +171,26 @@ export function MappingTable({ headers, columnValues, onComplete }: MappingTable
         <h3 className="text-lg font-medium">Unmapped CSV Columns</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {getUnmappedHeaders().map(header => (
-            <div key={header} className="p-4 border rounded-lg">
-              <span className="text-sm">{header}</span>
+            <div key={header} className="p-4 border rounded-lg space-y-2">
+              <span className="text-sm font-medium">{header}</span>
+              {sampleData[header] && (
+                <div className="text-xs text-muted-foreground">
+                  <div>Sample values:</div>
+                  <div className="space-y-1">
+                    {sampleData[header].map((value, i) => (
+                      <div key={i} className="truncate">{value}</div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
+      </div>
+
+      <div className="bg-muted p-4 rounded-lg">
+        <div className="text-sm font-medium">Total Records</div>
+        <div className="text-2xl font-bold">{recordCount.toLocaleString()}</div>
       </div>
 
       <Button
