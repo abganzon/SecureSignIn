@@ -7,12 +7,9 @@ import { Strategy as LocalStrategy } from "passport-local";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { Strategy as GitHubStrategy } from "passport-github2";
 import { z } from "zod";
-import { insertUniverseSchema, insertUserSchema, records } from "@shared/schema";
+import { insertUniverseSchema, insertUserSchema } from "@shared/schema";
 import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
-import multer from "multer";
-import Papa from "papaparse";
-import { db } from "./db";
 
 const scryptAsync = promisify(scrypt);
 
@@ -177,9 +174,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Add some logging to help debug
   app.post('/api/auth/login', (req, res, next) => {
     console.log('Login attempt:', { email: req.body.email });
-    passport.authenticate('local', (err: any, user: any, info: any) => {
+    passport.authenticate('local', (err, user, info) => {
       if (err) {
         console.error('Login error:', err);
         return next(err);
@@ -234,76 +232,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json(req.user);
   });
 
-  // Configure multer for file upload
-  const upload = multer({ storage: multer.memoryStorage() });
-
   // Universe routes
-  app.post('/api/universes', upload.single('file'), async (req, res) => {
-    if (!req.user) {
-      res.status(401).json({ message: 'Not authenticated' });
-      return;
-    }
-
-    try {
-      // Parse the JSON data from the form
-      const data = JSON.parse(req.body.data);
-
-      // Validate the universe data
-      const universeData = insertUniverseSchema.parse({
-        ...data,
-        userId: (req.user as any).id
-      });
-
-      // Create the universe
-      const universe = await storage.createUniverse(universeData);
-
-      // Parse the CSV file
-      const csvData = req.file?.buffer.toString();
-      if (!csvData) {
-        throw new Error('No file data received');
-      }
-
-      // Parse CSV and insert records
-      Papa.parse(csvData, {
-        header: true,
-        skipEmptyLines: true,
-        complete: async (results: Papa.ParseResult<any>) => {
-          // Convert CSV data to database records using the mappings
-          const recordsToInsert = results.data.map((row) => {
-            const record: Record<string, any> = {
-              universeId: universe.id,
-            };
-
-            // Apply mappings to transform CSV columns to database fields
-            Object.entries(data.mappings).forEach(([csvColumn, dbField]) => {
-              if (typeof csvColumn === 'string' && typeof dbField === 'string') {
-                record[dbField] = row[csvColumn];
-              }
-            });
-
-            return record;
-          });
-
-          // Insert all records
-          await db.insert(records).values(recordsToInsert);
-        },
-        error: (error: Error) => {
-          console.error('CSV parsing error:', error);
-          throw error;
-        }
-      });
-
-      res.json(universe);
-    } catch (err) {
-      if (err instanceof z.ZodError) {
-        res.status(400).json({ message: 'Invalid data', errors: err.errors });
-        return;
-      }
-      console.error('Error creating universe:', err);
-      res.status(500).json({ message: 'Error creating universe' });
-    }
-  });
-
   app.get('/api/universes', async (req, res) => {
     if (!req.user) {
       res.status(401).json({ message: 'Not authenticated' });
@@ -311,6 +240,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     const universes = await storage.getUniverses((req.user as any).id);
     res.json(universes);
+  });
+
+  app.post('/api/universes', async (req, res) => {
+    if (!req.user) {
+      res.status(401).json({ message: 'Not authenticated' });
+      return;
+    }
+
+    try {
+      const data = insertUniverseSchema.parse({
+        ...req.body,
+        userId: (req.user as any).id
+      });
+      const universe = await storage.createUniverse(data);
+      res.json(universe);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
+        res.status(400).json({ message: 'Invalid data', errors: err.errors });
+        return;
+      }
+      throw err;
+    }
   });
 
   const httpServer = createServer(app);
