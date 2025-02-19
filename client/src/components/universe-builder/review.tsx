@@ -92,7 +92,7 @@ export function Review({ name, type, recordCount, mappings }: ReviewProps) {
       </div>
 
       <Button
-        className="w-full"
+        className="w-48"
         onClick={handleCreate}
         disabled={createUniverse.isPending}
       >

@@ -204,7 +204,7 @@ export function MappingTable({ headers, columnValues, recordCount, sampleData, o
           Back
         </Button>
         <Button
-          className="flex-1"
+          className="w-48"
           onClick={() => onComplete(mappings)}
         >
           Continue to Review

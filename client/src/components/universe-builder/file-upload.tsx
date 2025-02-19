@@ -142,7 +142,7 @@ export function FileUpload({ onComplete }: FileUploadProps) {
           </div>
         )}
 
-        <Button type="submit" disabled={parsing} className="w-full">
+        <Button type="submit" disabled={parsing} className="w-48">
           {parsing ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
