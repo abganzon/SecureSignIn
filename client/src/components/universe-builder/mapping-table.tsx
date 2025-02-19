@@ -13,9 +13,10 @@ interface MappingTableProps {
   sampleData: Record<string, string[]>;
   recordCount: number;
   onComplete: (mappings: Record<string, string>) => void;
+  onBack: () => void;
 }
 
-export function MappingTable({ headers, columnValues, onComplete }: MappingTableProps) {
+export function MappingTable({ headers, columnValues, recordCount, sampleData, onComplete, onBack }: MappingTableProps) {
   const [mappings, setMappings] = useState<Record<string, string>>({});
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
 
@@ -195,13 +196,21 @@ export function MappingTable({ headers, columnValues, onComplete }: MappingTable
         </div>
       )}
 
-      <Button
-        className="w-full"
-        onClick={() => onComplete(mappings)}
-      >
-        Continue to Review
-        <ArrowRight className="ml-2 h-4 w-4" />
-      </Button>
+      <div className="flex gap-4">
+        <Button
+          variant="outline"
+          onClick={onBack}
+        >
+          Back
+        </Button>
+        <Button
+          className="flex-1"
+          onClick={() => onComplete(mappings)}
+        >
+          Continue to Review
+          <ArrowRight className="ml-2 h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 }

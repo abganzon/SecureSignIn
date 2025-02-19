@@ -9,6 +9,10 @@ type Step = "upload" | "mapping" | "review";
 
 export default function UniverseBuilder() {
   const [step, setStep] = useState<Step>("upload");
+  const handlePrevStep = () => {
+    if (step === "mapping") setStep("upload");
+    if (step === "review") setStep("mapping");
+  };
   const [data, setData] = useState<{
     name: string;
     type: string;
@@ -87,6 +91,7 @@ export default function UniverseBuilder() {
               sampleData={data.sampleData}
               recordCount={data.recordCount}
               onComplete={handleMappingComplete}
+              onBack={handlePrevStep}
             />
           </TabsContent>
 
