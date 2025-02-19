@@ -1,0 +1,68 @@
+Develop a web application with user authentication, allowing users to sign in via Google or GitHub. The app includes profile settings, side navigation, and a registration page. Upon successful login, users are redirected to a Dashboard page.
+
+Universe Builder Feature (3-Step Process)
+Step 1: Define Universe
+Users provide a Universe Name and select a Universe Type.
+Users upload a CSV or Excel file (maximum size: 50MB).
+A progress bar is displayed during the upload process.
+Step 2: Data Mapping
+Users map CSV/Excel columns to predefined database fields based on the following structure:
+
+javascript
+Copy
+Edit
+const AVAILABLE_MAPPINGS = {
+  Identity: {
+    title: "Identity Information",
+    fields: [{ value: "identity_type", label: "Identity Type" }]
+  },
+  Soul: {
+    title: "Personal Information",
+    fields: [
+      { value: "first_name", label: "First Name" },
+      { value: "last_name", label: "Last Name" },
+      { value: "dob_year", label: "Birth Year" },
+      { value: "dob_full", label: "Full Date of Birth" },
+      { value: "gender", label: "Gender" },
+    ]
+  },
+  Contact: {
+    title: "Contact Information",
+    fields: [
+      { value: "address_line1", label: "Address Line 1" },
+      { value: "address_line2", label: "Address Line 2" },
+      { value: "city", label: "City" },
+      { value: "state", label: "State" },
+      { value: "zip", label: "ZIP Code" },
+      { value: "zip4", label: "ZIP+4" },
+      { value: "phone_number", label: "Phone Number" },
+      { value: "email_address", label: "Email Address" },
+    ]
+  },
+  Business: {
+    title: "Business Information",
+    fields: [
+      { value: "job_title", label: "Job Title" },
+      { value: "department", label: "Department" },
+      { value: "seniority_level", label: "Seniority Level" },
+      { value: "business_email", label: "Business Email" },
+      { value: "direct_number", label: "Direct Phone" },
+      { value: "linkedin_url", label: "LinkedIn URL" },
+    ]
+  }
+};
+Auto-Mapping Feature:
+
+If a CSV/Excel field closely matches a database field, it is automatically mapped.
+A Matching Score (High, Medium, Low) is assigned based on similarity.
+Step 3: Review & Finalization
+Users review the Universe details:
+Universe Name
+Universe Type
+Total Records Imported
+Users can choose between:
+Appending new data
+Enhancing existing data
+Additional Features:
+Responsive UI with a clean and user-friendly design.
+Error handling and validation for file uploads and data mapping.
